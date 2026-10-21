@@ -1,0 +1,441 @@
+================================================================================
+
+PROJECT: HANDWRITTEN DIGIT RECOGNITION (END-TO-END)
+
+TIMEFRAME: 4 WEEKS (PHASE 0 -> PHASE 4)
+
+OPERATING RULE: 70/80 Implementation (Self-coded) + First Principles Understanding
+
+================================================================================
+
+
+
+[STATUS LEGEND]
+
+[ ] : Chưa bắt đầu (Not Started)
+
+[~] : Đang thực hiện (In Progress)
+
+[x] : Đã hoàn thành & Kiểm chứng (Completed & Verified)
+
+
+
+================================================================================
+
+PHASE 0: ENVIRONMENT SETUP & REPOSITORY FOUNDATION (DAY 1)
+
+Mục tiêu: Chuẩn bị môi trường cô lập, cài đặt thư viện và kiểm tra phần cứng.
+
+================================================================================
+
+
+
+Task 0.1: Thiết lập Virtual Environment & Dependencies
+
+  [X] Khởi tạo môi trường ảo: `python3 -m venv venv` và kích hoạt `source venv/bin/activate`
+
+  [X] Cấu hình `.vscode/settings.json` trỏ đúng vào `venv/bin/python`
+
+  [X] Điền danh sách thư viện vào `requirements.txt`:
+
+      - numpy
+
+      - matplotlib
+
+      - scikit-learn
+
+      - torch
+
+      - torchvision
+
+      - opencv-python
+
+      - streamlit
+
+      - streamlit-drawable-canvas
+
+  [X] Chạy cài đặt: `pip install -r requirements.txt`
+
+
+
+Task 0.2: Kiểm tra phần cứng & Git Hygiene
+
+  [X] Viết script ngắn kiểm tra phiên bản Python, NumPy, PyTorch và `torch.cuda.is_available()`
+
+  [X] Kiểm tra file `.gitignore` đã chặn `venv/`, `data/`, `__pycache__/`, `*.pth`, `*.pt`
+
+  [X] Commit và push cấu trúc chuẩn lên nhánh `main` trên GitHub.
+
+
+
+-> GHI CHÚ / LỖI ĐÃ XỬ LÝ (PHASE 0):
+
+   - 
+
+
+
+================================================================================
+
+PHASE 1: DATA EXPLORATION (EDA) & CLASSICAL ML BASELINE (WEEK 1)
+
+Mục tiêu: Hiểu bản chất ảnh số dưới dạng ma trận 2D / vector 1D và dựng mốc so sánh
+
+(Benchmark) bằng thuật toán Machine Learning cổ điển.
+
+================================================================================
+
+
+
+Task 1.1: Khám phá dữ liệu gốc (EDA) - File: `notebooks/01_eda.ipynb`
+
+  [ ] Tải bộ dữ liệu MNIST (60,000 ảnh train / 10,000 ảnh test) qua `torchvision.datasets` hoặc `sklearn.datasets`
+
+  [ ] Kiểm tra kích thước (shape), kiểu dữ liệu (`dtype`: uint8 vs float32), min/max pixel (0 -> 255)
+
+  [ ] Trực quan hóa (Visualize):
+
+      - Vẽ lưới 5x5 ảnh ngẫu nhiên kèm nhãn (label)
+
+      - Vẽ 1 ảnh phóng to kèm giá trị số của từng pixel chồng lên ô lưới 28x28 để hiểu cấu trúc ma trận
+
+  [ ] Vẽ biểu đồ cột (Bar chart) kiểm tra phân phối số lượng mẫu của 10 lớp (0-9) trong tập Train và Test
+
+  [ ] Tính và vẽ "Ảnh trung bình" (Mean Image) của từng chữ số từ 0 đến 9 để quan sát hình thái đặc trưng.
+
+
+
+Task 1.2: Xây dựng Pipeline tiền xử lý - File: `src/dataset.py`
+
+  [ ] Viết hàm `load_raw_data(data_dir)`: Trả về `X_train, y_train, X_test, y_test`
+
+  [ ] Viết hàm `split_train_val(X, y, val_ratio=0.1)`: Chia tập Train (60,000) thành Train (54,000) và Validation (6,000) có cố định `random_state`
+
+  [ ] Viết hàm `normalize_pixels(X)`: Chuyển kiểu dữ liệu sang `float32` và đưa giá trị từ `[0, 255]` về `[0.0, 1.0]`
+
+  [ ] Viết hàm `flatten_images(X)`: Biến đổi tensor 3D `(N, 28, 28)` thành ma trận 2D `(N, 784)`
+
+  [ ] Viết hàm `one_hot_encode(y, num_classes=10)`: Biến vector nhãn `(N,)` thành ma trận `(N, 10)` (phục vụ cho Tuần 2)
+
+  [ ] Viết hàm test kiểm tra toàn bộ `shape` và `assert` không có giá trị `NaN` hay vượt ngoài `[0, 1]`.
+
+
+
+Task 1.3: Mô hình Baseline cổ điển - File: `src/model.py` & `src/train.py`
+
+  [ ] Khởi tạo mô hình Baseline 1: `LogisticRegression(max_iter=...)` từ `scikit-learn`
+
+  [ ] Khởi tạo mô hình Baseline 2 (Tùy chọn so sánh): `KNeighborsClassifier(n_neighbors=3)`
+
+  [ ] Huấn luyện trên tập Train `(54000, 784)` và đo thời gian chạy
+
+  [ ] Đánh giá trên tập Validation và Test:
+
+      - Tính Overall Accuracy (%)
+
+      - Tính Precision, Recall, F1-Score cho từng chữ số (0-9)
+
+      - Vẽ Confusion Matrix (Ma trận nhầm lẫn) kích thước 10x10.
+
+
+
+Task 1.4: Phân tích giới hạn của mô hình tuyến tính (Error Analysis)
+
+  [ ] Lọc ra 10 tấm ảnh bị Logistic Regression đoán sai với độ tự tin cao nhất
+
+  [ ] Ghi nhận các cặp số hay bị nhầm lẫn nhất (ví dụ: 4 với 9, 3 với 8, 5 với 3)
+
+  [ ] Giải thích nguyên lý tại sao việc duỗi phẳng (Flatten) làm mất cấu trúc không gian 2D của nét chữ.
+
+
+
+-> KẾT QUẢ ĐẠT ĐƯỢC & GHI CHÚ (PHASE 1):
+
+   - Baseline Train Accuracy : ... %
+
+   - Baseline Val Accuracy   : ... %
+
+   - Baseline Test Accuracy  : ... %
+
+   - Các cặp số nhầm nhiều   : ...
+
+
+
+================================================================================
+
+PHASE 2: NEURAL NETWORK FROM SCRATCH USING PURE NUMPY (WEEK 2)
+
+Mục tiêu: Tự tay cài đặt toàn bộ toán học của Mạng Nơ-ron (MLP) bằng NumPy thuần,
+
+không dùng PyTorch autograd để nắm trọn vẹn cơ chế Forward & Backpropagation.
+
+================================================================================
+
+
+
+Task 2.1: Thiết kế Kiến trúc & Khởi tạo Trọng số - File: `src/model.py`
+
+  [ ] Thiết kế class `MLPFromScratch` với kiến trúc: `Input (784) -> Hidden (128, ReLU) -> Output (10, Softmax)`
+
+  [ ] Cài đặt hàm khởi tạo trọng số He Initialization cho lớp ReLU:
+
+      - `W1` shape `(784, 128)`, `b1` shape `(1, 128)`
+
+      - `W2` shape `(128, 10)`, `b2` shape `(1, 10)`
+
+      - Giải thích tại sao không được khởi tạo toàn bộ `W = 0` (Symmetry breaking).
+
+
+
+Task 2.2: Cài đặt Lan truyền xuôi (Forward Pass) & Hàm mất mát
+
+  [ ] Viết hàm kích hoạt `relu(Z)`: `np.maximum(0, Z)`
+
+  [ ] Viết hàm `softmax(Z)` có xử lý chống tràn số học (Numerical Stability) bằng cách trừ đi `np.max(Z, axis=1, keepdims=True)`
+
+  [ ] Viết hàm `forward(X)`:
+
+      - Tính `Z1 = X @ W1 + b1` -> `A1 = relu(Z1)`
+
+      - Tính `Z2 = A1 @ W2 + b2` -> `A2 = softmax(Z2)`
+
+      - Lưu cache `(X, Z1, A1, Z2, A2)` để dùng cho bước tính đạo hàm
+
+  [ ] Viết hàm `compute_loss(Y_hat, Y_onehot)`:
+
+      - Tính Categorical Cross-Entropy Loss: `L = - (1/m) * sum(Y * log(Y_hat + 1e-8))`
+
+
+
+Task 2.3: Cài đặt Lan truyền ngược (Backpropagation) & Gradient Checking
+
+  [ ] Chứng minh công thức đạo hàm bằng Chain Rule trên giấy/markdown:
+
+      - `dZ2 = A2 - Y_onehot` (shape: `batch_size, 10`)
+
+      - `dW2 = (1/m) * (A1.T @ dZ2)` (shape: `128, 10`)
+
+      - `db2 = (1/m) * np.sum(dZ2, axis=0, keepdims=True)` (shape: `1, 10`)
+
+      - `dA1 = dZ2 @ W2.T` (shape: `batch_size, 128`)
+
+      - `dZ1 = dA1 * (Z1 > 0)` (đạo hàm ReLU, shape: `batch_size, 128`)
+
+      - `dW1 = (1/m) * (X.T @ dZ1)` (shape: `784, 128`)
+
+      - `db1 = (1/m) * np.sum(dZ1, axis=0, keepdims=True)` (shape: `1, 128`)
+
+  [ ] Viết hàm `backward(Y_onehot)` trả về dictionary chứa `dW1, db1, dW2, db2`
+
+  [ ] Viết hàm kiểm tra đạo hàm số học (Numerical Gradient Check): So sánh đạo hàm giải tích với xấp xỉ `(J(theta + eps) - J(theta - eps)) / (2*eps)` trên một batch nhỏ để đảm bảo không sai công thức.
+
+
+
+Task 2.4: Vòng lặp Huấn luyện Mini-batch SGD - File: `src/train.py`
+
+  [ ] Viết bộ tạo dữ liệu theo lô `get_mini_batches(X, Y, batch_size=64, shuffle=True)`
+
+  [ ] Viết hàm `update_params(grads, learning_rate)` cập nhật `W = W - lr * dW`
+
+  [ ] Chạy vòng lặp huấn luyện qua `epochs = 20..50`:
+
+      - Ghi lại `train_loss`, `val_loss`, `train_acc`, `val_acc` sau mỗi epoch
+
+  [ ] Vẽ biểu đồ Learning Curves (Loss & Accuracy theo Epoch)
+
+  [ ] Lưu bộ trọng số tốt nhất vào file `.npz` bằng `np.savez()`.
+
+
+
+-> KẾT QUẢ ĐẠT ĐƯỢC & GHI CHÚ (PHASE 2):
+
+   - NumPy MLP Val Accuracy  : ... % (Mục tiêu: >= 96%)
+
+   - NumPy MLP Test Accuracy : ... %
+
+   - Các lỗi bug toán học đã fix: ...
+
+
+
+================================================================================
+
+PHASE 3: DEEP LEARNING WITH PYTORCH & CNN ARCHITECTURE (WEEK 3)
+
+Mục tiêu: Chuyển dịch sang framework công nghiệp PyTorch, xây dựng mạng tích chập (CNN)
+
+giữ nguyên cấu trúc không gian 2D để đẩy độ chính xác lên > 99%.
+
+================================================================================
+
+
+
+Task 3.1: Refactor Data Pipeline sang PyTorch - File: `src/dataset.py`
+
+  [ ] Giữ nguyên chiều không gian ảnh 2D kèm kênh màu: `(N, 1, 28, 28)` thay vì flatten
+
+  [ ] Viết custom class `MNISTDataset(torch.utils.data.Dataset)` với `__len__` và `__getitem__`
+
+  [ ] Áp dụng Data Augmentation nhẹ cho tập Train (RandomRotation +-10 độ, RandomAffine dịch chuyển nhẹ) để mô hình bền vững với chữ viết tay thực tế
+
+  [ ] Khởi tạo `DataLoader` cho `train_loader`, `val_loader`, `test_loader` (`batch_size=64`, `shuffle=True`).
+
+
+
+Task 3.2: Thiết kế Kiến trúc Mạng Tích Chập (CNN) - File: `src/model.py`
+
+  [ ] Tính toán bằng tay kích thước Feature Map qua từng lớp theo công thức:
+
+      `Out = floor((In + 2*padding - kernel_size) / stride) + 1`
+
+  [ ] Xây dựng class `DigitCNN(nn.Module)`:
+
+      - Block 1: `Conv2d(1, 32, kernel=3, pad=1)` -> `BatchNorm2d(32)` -> `ReLU()` -> `MaxPool2d(2, 2)` (Output: `32 x 14 x 14`)
+
+      - Block 2: `Conv2d(32, 64, kernel=3, pad=1)` -> `BatchNorm2d(64)` -> `ReLU()` -> `MaxPool2d(2, 2)` (Output: `64 x 7 x 7`)
+
+      - Classifier: `Flatten()` -> `Linear(64*7*7, 128)` -> `ReLU()` -> `Dropout(0.5)` -> `Linear(128, 10)`
+
+  [ ] Truyền thử 1 dummy tensor `torch.randn(4, 1, 28, 28)` qua mạng để kiểm tra output shape đạt `(4, 10)`.
+
+
+
+Task 3.3: Chuẩn hóa Vòng lặp Huấn luyện PyTorch - File: `src/train.py`
+
+  [ ] Thiết lập thiết bị tính toán tự động: `device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')`
+
+  [ ] Khởi tạo `criterion = nn.CrossEntropyLoss()` (Hiểu rõ hàm này đã tích hợp sẵn `LogSoftmax` + `NLLLoss` nên output của model không gắn Softmax)
+
+  [ ] Khởi tạo `optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)`
+
+  [ ] Viết hàm `train_one_epoch(model, dataloader, criterion, optimizer, device)`:
+
+      - Đảm bảo bật `model.train()`
+
+      - Thực hiện chuẩn 5 bước: `optimizer.zero_grad()` -> `outputs = model(inputs)` -> `loss = criterion(...)` -> `loss.backward()` -> `optimizer.step()`
+
+  [ ] Viết hàm `evaluate(model, dataloader, criterion, device)`:
+
+      - Đảm bảo bật `model.eval()` và dùng ngữ cảnh `with torch.no_grad():`
+
+  [ ] Cài đặt cơ chế Model Checkpointing: Chỉ lưu `torch.save(model.state_dict(), 'models/best_cnn.pth')` khi `val_loss` giảm xuống mức thấp nhất mới.
+
+
+
+Task 3.4: Phân tích chuyên sâu & Trực quan hóa Đặc trưng (Error & Feature Analysis)
+
+  [ ] Vẽ Confusion Matrix của mô hình CNN trên 10,000 ảnh tập Test
+
+  [ ] Hiển thị 15 ca khó nhất trong tập Test mà CNN vẫn đoán sai (kèm nhãn thật vs nhãn đoán và xác suất dự đoán)
+
+  [ ] Trích xuất và vẽ Feature Maps của lớp `Conv2d` đầu tiên khi đưa 1 tấm ảnh số vào để nhìn thấy cách CNN bắt cạnh ngang, cạnh dọc, đường cong.
+
+
+
+-> KẾT QUẢ ĐẠT ĐƯỢC & GHI CHÚ (PHASE 3):
+
+   - PyTorch CNN Val Accuracy  : ... % (Mục tiêu: >= 99.0%)
+
+   - PyTorch CNN Test Accuracy : ... %
+
+   - Đường dẫn file checkpoint : `models/best_cnn.pth`
+
+
+
+================================================================================
+
+PHASE 4: REAL-WORLD IMAGE PREPROCESSING & WEB APPLICATION (WEEK 4)
+
+Mục tiêu: Giải quyết sự khác biệt giữa dữ liệu phòng thí nghiệm (MNIST) và nét vẽ/ảnh
+
+chụp thực tế của người dùng (Domain Shift), đóng gói thành sản phẩm Web App hoàn chỉnh.
+
+================================================================================
+
+
+
+Task 4.1: Xây dựng Pipeline Xử lý Ảnh Thực tế bằng OpenCV - File: `src/preprocess.py`
+
+  [ ] Phân tích sự khác biệt (Domain Gap) giữa ảnh vẽ/chụp thực tế và ảnh chuẩn MNIST:
+
+      - Thực tế: Nền trắng chữ đen, kích thước bất kỳ, nét vẽ mảnh/dày khác nhau, chữ nằm lệch góc.
+
+      - MNIST: Nền đen (0) chữ trắng (255), kích thước đúng 28x28, chữ số nằm gọn trong khung 20x20 và được căn giữa theo Trọng tâm khối lượng (Center of Mass).
+
+  [ ] Viết chuỗi hàm xử lý chuẩn hóa ảnh đầu vào `preprocess_user_image(raw_img)`:
+
+      1. Chuyển ảnh sang Grayscale (nếu là ảnh RGB/RGBA)
+
+      2. Đảo ngược màu (Invert) nếu nền đang là màu sáng để đưa về nền đen - chữ trắng
+
+      3. Khử nhiễu bằng Gaussian Blur nhẹ và phân ngưỡng (Thresholding / Otsu)
+
+      4. Tìm đường bao `cv2.findContours()` để xác định khung hình chữ nhật nhỏ nhất (Bounding Box) ôm sát chữ số và cắt (Crop) bỏ vùng trống thừa
+
+      5. Giữ nguyên tỷ lệ khung hình (Aspect Ratio), resize cạnh dài nhất của chữ số về 20 pixel (dùng `cv2.INTER_AREA`)
+
+      6. Đệm viền đen (Padding) xung quanh ảnh 20x20 để đạt kích thước 28x28
+
+      7. Tính Trọng tâm khối lượng (Center of Mass) của các điểm ảnh và dịch chuyển (WarpAffine) để trọng tâm chữ số trùng khớp với tâm ảnh (tọa độ 14, 14)
+
+      8. Chuẩn hóa giá trị pixel và biến đổi thành Tensor `(1, 1, 28, 28)` sẵn sàng đưa vào model.
+
+
+
+Task 4.2: Xây dựng Module Suy luận (Inference Engine) - File: `src/predict.py`
+
+  [ ] Viết class hoặc hàm `DigitPredictor`:
+
+      - Nạp kiến trúc `DigitCNN` và load trọng số từ `models/best_cnn.pth` (dùng `map_location` để chạy mượt trên cả CPU)
+
+      - Chuyển model sang chế độ `eval()`
+
+      - Nhận ảnh thô -> gọi `preprocess_user_image()` -> chạy qua model -> tính `torch.softmax(logits, dim=1)`
+
+      - Trả về: Chữ số dự đoán, độ tự tin (Confidence %), mảng xác suất của cả 10 lớp (0-9), và tấm ảnh 28x28 sau khi đã qua OpenCV xử lý.
+
+
+
+Task 4.3: Xây dựng Giao diện Web Tương tác - File: `app/streamlit_app.py`
+
+  [ ] Thiết kế bố cục giao diện 2 cột trên Streamlit:
+
+      - Cột 1 (Input): Bảng vẽ tay trực tiếp (`st_canvas`) cho phép chỉnh độ dày nét bút, nút xóa bảng, hoặc tùy chọn tải ảnh chụp từ máy tính lên
+
+      - Cột 2 (Output & Explainability):
+
+        + Hiển thị ảnh 28x28 sau khi qua bước tiền xử lý OpenCV (giúp debug trực quan xem ảnh đưa vào model có giống MNIST không)
+
+        + Hiển thị kết quả chữ số dự đoán cỡ lớn kèm phần trăm độ tự tin
+
+        + Vẽ biểu đồ ngang (Bar chart) thể hiện phân phối xác suất từ 0 đến 9.
+
+
+
+Task 4.4: Kiểm thử Thực tế, Đóng gói & Viết Tài liệu (Documentation)
+
+  [ ] Thực hiện Stress Test trên ứng dụng:
+
+      - Vẽ số rất nhỏ ở góc bảng, vẽ số rất to, vẽ nét đứt, vẽ các số dễ nhầm (1 có gạch chân, 7 có gạch ngang, 4 hở đầu vs 9)
+
+      - Tinh chỉnh lại độ dày nét vẽ hoặc bước Morphological Dilation trong `src/preprocess.py` nếu nét quá mảnh
+
+  [ ] Dọn dẹp toàn bộ mã nguồn: Thêm Type Hints, Docstrings ngắn gọn cho các hàm trong `src/`
+
+  [ ] Cập nhật `requirements.txt` chuẩn xác lần cuối
+
+  [ ] Viết `README.md` chuyên nghiệp:
+
+      - Tổng quan kiến trúc dự án & Sơ đồ luồng xử lý
+
+      - Bảng tổng hợp kết quả thực nghiệm qua 3 giai đoạn (Logistic Regression vs. NumPy MLP vs. PyTorch CNN)
+
+      - Minh họa bài toán Domain Shift khi xử lý ảnh thực tế bằng OpenCV
+
+      - Hướng dẫn câu lệnh cài đặt và khởi chạy ứng dụng (`streamlit run app/streamlit_app.py`).
+
+
+
+================================================================================
+
+END OF TASK TRACKER
+
+================================================================================
